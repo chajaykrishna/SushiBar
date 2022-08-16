@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.7;
+pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -19,13 +19,14 @@ contract SushiBar is ERC20("SushiBar", "xSUSHI"){
     mapping (address => uint) public userToUnStakedSushi;
     
     // Define the Sushi token contract
-    constructor(IERC20 _sushi) public {
+    constructor(IERC20 _sushi) {
         sushi = _sushi;
     }
 
     // Enter the bar. Pay some SUSHIs. Earn some shares.
     // Locks Sushi and mints xSushi
     function enter(uint256 _amount) public {
+        require(_amount > 0, "amount should be more than 0");
         //record the staking time
         userToStakingTimestamp[msg.sender] = block.timestamp;
         // Gets the amount of Sushi locked in the contract
@@ -57,9 +58,9 @@ contract SushiBar is ERC20("SushiBar", "xSUSHI"){
     *
      */
     function leave(uint256 _share) public {
-
+        require(_share > 0, "share should be more than 0");
         uint stakedTime = block.timestamp - userToStakingTimestamp[msg.sender];
-        require(stakedTime > 2 minutes, "cannot unstake sushi for the first 2days");
+        require(stakedTime > 2 days, "you can unstake sushi only after 2days");
 
         uint256 totalSushiStaked = userToxSushi[msg.sender];
         uint256 totalUnstakedSushi = userToUnStakedSushi[msg.sender];
@@ -104,15 +105,16 @@ contract SushiBar is ERC20("SushiBar", "xSUSHI"){
     */ 
     function _unstakingCheck(uint256 _stakedTime, uint256 totalStakedSushi, uint256 _share) internal pure returns(bool success) {
         
-        if(_stakedTime <= 4 minutes) {
+        if(_stakedTime <= 4 days) {
             return (_share <= totalStakedSushi.div(4));
         } 
-        else if(_stakedTime <= 6 minutes) {
+        else if(_stakedTime <= 6 days) {
              return (_share <= totalStakedSushi.div(2));
         }
-        else if(_stakedTime <= 8 minutes) {
+        else if(_stakedTime <= 8 days) {
              return (_share <= (3 * (totalStakedSushi)).div(4));
         }
         else return true;
     }
+
 }

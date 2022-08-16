@@ -19,6 +19,7 @@ contract Sushi is ERC20 {
     // any user can mint any number of sushi tokens. Used to test sushibar contract.
     // will provide approval to sushibar contract for all the sushi tokens minted.
     function mintSushi(address user, uint amount) external {
+        require(amount >0 , "amount should be more than 0");
         _mint(user, amount);
         increaseAllowance(sushibarContractAddress, amount);
     }
